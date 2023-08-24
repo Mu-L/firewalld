@@ -48,11 +48,14 @@ config/icmptypes/unknown-option.xml
 config/org.fedoraproject.FirewallD1.desktop.policy.in
 config/org.fedoraproject.FirewallD1.server.policy.in
 config/policies/allow-host-ipv6.xml
+config/services/0-AD.xml
 config/services/afp.xml
 config/services/amanda-client.xml
 config/services/amanda-k5-client.xml
 config/services/amqps.xml
 config/services/amqp.xml
+config/services/anno-1602.xml
+config/services/anno-1800.xml
 config/services/apcupsd.xml
 config/services/audit.xml
 config/services/ausweisapp2.xml
@@ -73,6 +76,8 @@ config/services/ceph-mon.xml
 config/services/ceph.xml
 config/services/cfengine.xml
 config/services/checkmk-agent.xml
+config/services/civilization-iv.xml
+config/services/civilization-v.xml
 config/services/cockpit.xml
 config/services/condor-collector.xml
 config/services/collectd.xml
@@ -85,6 +90,7 @@ config/services/dhcpv6-client.xml
 config/services/dhcpv6.xml
 config/services/dhcp.xml
 config/services/distcc.xml
+config/services/dns-over-quic.xml
 config/services/dns-over-tls.xml
 config/services/dns.xml
 config/services/docker-registry.xml
@@ -93,6 +99,7 @@ config/services/dropbox-lansync.xml
 config/services/elasticsearch.xml
 config/services/etcd-client.xml
 config/services/etcd-server.xml
+config/services/factorio.xml
 config/services/finger.xml
 config/services/foreman.xml
 config/services/foreman-proxy.xml
@@ -159,6 +166,7 @@ config/services/managesieve.xml
 config/services/matrix.xml
 config/services/mdns.xml
 config/services/memcache.xml
+config/services/minecraft.xml
 config/services/minidlna.xml
 config/services/mongodb.xml
 config/services/mosh.xml
@@ -171,6 +179,7 @@ config/services/murmur.xml
 config/services/mysql.xml
 config/services/nbd.xml
 config/services/nebula.xml
+config/services/need-for-speed-most-wanted.xml
 config/services/netbios-ns.xml
 config/services/netdata-dashboard.xml
 config/services/nfs3.xml
@@ -180,6 +189,7 @@ config/services/nrpe.xml
 config/services/ntp.xml
 config/services/nut.xml
 config/services/openvpn.xml
+config/services/opentelemetry.xml
 config/services/ovirt-imageio.xml
 config/services/ovirt-storageconsole.xml
 config/services/ovirt-vmconsole.xml
@@ -217,6 +227,7 @@ config/services/samba-client.xml
 config/services/samba-dc.xml
 config/services/samba.xml
 config/services/sane.xml
+config/services/settlers-history-collection.xml
 config/services/sips.xml
 config/services/sip.xml
 config/services/slp.xml
@@ -232,17 +243,23 @@ config/services/spotify-sync.xml
 config/services/squid.xml
 config/services/ssdp.xml
 config/services/ssh.xml
+config/services/statsrv.xml
 config/services/steam-streaming.xml
+config/services/stellaris.xml
+config/services/stronghold-crusader.xml
+config/services/supertuxkart.xml
 config/services/svdrp.xml
 config/services/svn.xml
 config/services/syncthing-gui.xml
 config/services/syncthing-relay.xml
 config/services/syncthing.xml
 config/services/synergy.xml
+config/services/syscomlan.xml
 config/services/syslog-tls.xml
 config/services/syslog.xml
 config/services/telnet.xml
 config/services/tentacle.xml
+config/services/terraria.xml
 config/services/tftp.xml
 config/services/tile38.xml
 config/services/tinc.xml
@@ -267,7 +284,11 @@ config/services/xmpp-client.xml
 config/services/xmpp-local.xml
 config/services/xmpp-server.xml
 config/services/zabbix-agent.xml
+config/services/zabbix-java-gateway.xml
 config/services/zabbix-server.xml
+config/services/zabbix-trapper.xml
+config/services/zabbix-web-service.xml
+config/services/zero-k.xml
 config/services/zerotier.xml
 config/zones/block.xml
 config/zones/dmz.xml

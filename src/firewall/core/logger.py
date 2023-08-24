@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2005-2007,2012 Red Hat, Inc.
 #
@@ -19,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "LogTarget", "FileLog", "Logger", "log" ]
-
 import sys
 import types
 import time
@@ -35,7 +32,7 @@ import os
 # ---------------------------------------------------------------------------
 
 # abstract class for logging targets
-class LogTarget(object):
+class LogTarget:
     """ Abstract class for logging targets. """
     def __init__(self):
         self.fd = None
@@ -164,7 +161,7 @@ class FileLog(LogTarget):
 
 # ---------------------------------------------------------------------------
 
-class Logger(object):
+class Logger:
     r"""
     Format string:
 
@@ -894,5 +891,3 @@ if __name__ == '__main__':
     except Exception as e:
         log.exception()
 """
-
-# vim:ts=4:sw=4:showmatch:expandtab

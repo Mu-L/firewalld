@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -18,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-__all__ = [ "Firewall" ]
 
 import os
 import sys
@@ -67,7 +64,7 @@ from firewall.errors import FirewallError
 #
 ############################################################################
 
-class Firewall(object):
+class Firewall:
     def __init__(self, offline=False):
         self._firewalld_conf = firewalld_conf(config.FIREWALLD_CONF)
         self._offline = offline
@@ -119,6 +116,8 @@ class Firewall(object):
         self._flush_all_on_reload = config.FALLBACK_FLUSH_ALL_ON_RELOAD
         self._rfc3964_ipv4 = config.FALLBACK_RFC3964_IPV4
         self._allow_zone_drifting = config.FALLBACK_ALLOW_ZONE_DRIFTING
+        self._nftables_flowtable = config.FALLBACK_NFTABLES_FLOWTABLE
+        self._nftables_counters = config.FALLBACK_NFTABLES_COUNTERS
 
         if self._offline:
             self.ip4tables_enabled = False
@@ -375,6 +374,18 @@ class Firewall(object):
                 log.debug1("RFC3964_IPv4 is set to '%s'",
                            self._rfc3964_ipv4)
 
+            if self._firewalld_conf.get("NftablesFlowtable"):
+                self._nftables_flowtable = self._firewalld_conf.get("NftablesFlowtable")
+                log.debug1("NftablesFlowtable is set to '%s'", self._nftables_flowtable)
+
+            if self._firewalld_conf.get("NftablesCounters"):
+                value = self._firewalld_conf.get("NftablesCounters")
+                if value.lower() in [ "no", "false" ]:
+                    self._nftables_counters = False
+                else:
+                    self._nftables_counters = True
+                log.debug1("NftablesCounters is set to '%s'", self._nftables_counters)
+
         self.config.set_firewalld_conf(copy.deepcopy(self._firewalld_conf))
 
     def _start_load_lockdown_whitelist(self):
@@ -473,7 +484,8 @@ class Firewall(object):
     def _start_apply_objects(self, reload=False, complete_reload=False):
         transaction = FirewallTransaction(self)
 
-        self.flush(use_transaction=transaction)
+        if not reload:
+            self.flush(use_transaction=transaction)
 
         # If modules need to be unloaded in complete reload or if there are
         # ipsets to get applied, limit the transaction to flush.
@@ -503,11 +515,12 @@ class Firewall(object):
         log.debug1("Applying default rule set")
         self.apply_default_rules(use_transaction=transaction)
 
+        log.debug1("Applying default zone")
+        self.zone.apply_zone_settings(self._default_zone, transaction)
+        self.zone._interface(True, self._default_zone, "+", transaction)
+
         log.debug1("Applying used zones")
         self.zone.apply_zones(use_transaction=transaction)
-
-        self.zone.change_default_zone(None, self._default_zone,
-                                      use_transaction=transaction)
 
         log.debug1("Applying used policies")
         self.policy.apply_policies(use_transaction=transaction)
@@ -943,7 +956,26 @@ class Firewall(object):
         if use_transaction is None:
             transaction.execute(True)
 
-    # flush and policy
+    def may_skip_flush_direct_backends(self):
+        if self.nftables_enabled and not self.direct.has_runtime_configuration():
+            return True
+
+        return False
+
+    def flush_direct_backends(self, use_transaction=None):
+        if use_transaction is None:
+            transaction = FirewallTransaction(self)
+        else:
+            transaction = use_transaction
+
+        for backend in self.all_backends():
+            if backend in self.enabled_backends():
+                continue
+            rules = backend.build_flush_rules()
+            transaction.add_rules(backend, rules)
+
+        if use_transaction is None:
+            transaction.execute(True)
 
     def flush(self, use_transaction=None):
         if use_transaction is None:
@@ -953,7 +985,10 @@ class Firewall(object):
 
         log.debug1("Flushing rule set")
 
-        for backend in self.all_backends():
+        if not self.may_skip_flush_direct_backends():
+            self.flush_direct_backends(use_transaction=transaction)
+
+        for backend in self.enabled_backends():
             rules = backend.build_flush_rules()
             transaction.add_rules(backend, rules)
 
@@ -1095,6 +1130,7 @@ class Firewall(object):
         _omit_native_ipset = self.ipset.omit_native_ipset()
 
         # must stash this. The value may change after _start()
+        old_firewall_backend = self._firewall_backend
         flush_all = self._flush_all_on_reload
 
         if not flush_all:
@@ -1113,7 +1149,7 @@ class Firewall(object):
         if not _panic:
             self.set_policy("DROP")
 
-        # stop
+        self.flush()
         self.cleanup()
 
         start_exception = None
@@ -1196,6 +1232,19 @@ class Firewall(object):
         if not self._panic:
             self.set_policy("ACCEPT")
 
+        # If the FirewallBackend changed, then we must also cleanup the policy
+        # for the old backend that was set to DROP above.
+        if not self._panic and old_firewall_backend != self._firewall_backend:
+            if old_firewall_backend == "nftables":
+                for rule in self.nftables_backend.build_set_policy_rules("ACCEPT"):
+                    self.nftables_backend.set_rule(rule, self._log_denied)
+            else:
+                for rule in self.ip4tables_backend.build_set_policy_rules("ACCEPT"):
+                    self.ip4tables_backend.set_rule(rule, self._log_denied)
+                if self.ip6tables_enabled:
+                    for rule in self.ip6tables_backend.build_set_policy_rules("ACCEPT"):
+                        self.ip6tables_backend.set_rule(rule, self._log_denied)
+
         if start_exception:
             self._state = "FAILED"
             raise start_exception
@@ -1259,33 +1308,18 @@ class Firewall(object):
 
     def set_default_zone(self, zone):
         _zone = self.check_zone(zone)
-        if _zone != self._default_zone:
-            _old_dz = self._default_zone
-            self._default_zone = _zone
-            self._firewalld_conf.set("DefaultZone", _zone)
-            self._firewalld_conf.write()
-
-            if self._offline:
-                return
-
-            # remove old default zone from ZONES and add new default zone
-            self.zone.change_default_zone(_old_dz, _zone)
-
-            # Move interfaces from old default zone to the new one.
-            for iface in self.zone.get_zone(_old_dz).interfaces:
-                if iface in self._default_zone_interfaces:
-                    # move only those that were added to default zone
-                    # (not those that were added to specific zone same as default)
-                    self.zone.change_zone_of_interface("", iface)
-        else:
+        if _zone == self._default_zone:
             raise FirewallError(errors.ZONE_ALREADY_SET, _zone)
+
+        self._firewalld_conf.set("DefaultZone", _zone)
+        self._firewalld_conf.write()
 
     def combine_runtime_with_permanent_settings(self, permanent, runtime):
         combined = permanent.copy()
 
         for key,value in runtime.items():
             # omit empty entries
-            if value or isinstance(value, bool):
+            if value or isinstance(value, bool) or isinstance(value, int):
                 combined[key] = value
             # make sure to remove values that were in permanent, but no
             # longer in runtime.

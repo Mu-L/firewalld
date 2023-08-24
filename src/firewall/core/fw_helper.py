@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2016 Red Hat, Inc.
 #
@@ -21,12 +20,10 @@
 
 """helper backend"""
 
-__all__ = [ "FirewallHelper" ]
-
 from firewall import errors
 from firewall.errors import FirewallError
 
-class FirewallHelper(object):
+class FirewallHelper:
     def __init__(self, fw):
         self._fw = fw
         self._helpers = { }

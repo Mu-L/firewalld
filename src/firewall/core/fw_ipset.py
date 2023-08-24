@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2016 Red Hat, Inc.
 #
@@ -21,8 +20,6 @@
 
 """ipset backend"""
 
-__all__ = [ "FirewallIPSet" ]
-
 from firewall.core.logger import log
 from firewall.core.ipset import remove_default_create_options as rm_def_cr_opts, \
                                 normalize_ipset_entry, check_entry_overlaps_existing, \
@@ -31,7 +28,7 @@ from firewall.core.io.ipset import IPSet
 from firewall import errors
 from firewall.errors import FirewallError
 
-class FirewallIPSet(object):
+class FirewallIPSet:
     def __init__(self, fw):
         self._fw = fw
         self._ipsets = { }

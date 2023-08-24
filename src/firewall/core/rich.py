@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2013-2016 Red Hat, Inc.
 #
@@ -19,20 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "Rich_Source", "Rich_Destination", "Rich_Service", "Rich_Port",
-            "Rich_Protocol", "Rich_Masquerade", "Rich_IcmpBlock",
-            "Rich_IcmpType",
-            "Rich_SourcePort", "Rich_ForwardPort", "Rich_Log", "Rich_NFLog",
-            "Rich_Accept", "Rich_Reject", "Rich_Drop", "Rich_Mark",
-            "Rich_Audit", "Rich_Limit", "Rich_Rule", "Rich_Tcp_Mss_Clamp" ]
-
 from firewall import functions
 from firewall.core.ipset import check_ipset_name
 from firewall.core.base import REJECT_TYPES
 from firewall import errors
 from firewall.errors import FirewallError
 
-class Rich_Source(object):
+class Rich_Source:
     def __init__(self, addr, mac, ipset, invert=False):
         self.addr = addr
         if self.addr == "":
@@ -61,7 +53,7 @@ class Rich_Source(object):
         raise FirewallError(errors.INVALID_RULE,
                             "no address, mac and ipset")
 
-class Rich_Destination(object):
+class Rich_Destination:
     def __init__(self, addr, ipset, invert=False):
         self.addr = addr
         if self.addr == "":
@@ -83,14 +75,14 @@ class Rich_Destination(object):
         raise FirewallError(errors.INVALID_RULE,
                             "no address and ipset")
 
-class Rich_Service(object):
+class Rich_Service:
     def __init__(self, name):
         self.name = name
 
     def __str__(self):
         return 'service name="%s"' % (self.name)
 
-class Rich_Port(object):
+class Rich_Port:
     def __init__(self, port, protocol):
         self.port = port
         self.protocol = protocol
@@ -98,47 +90,54 @@ class Rich_Port(object):
     def __str__(self):
         return 'port port="%s" protocol="%s"' % (self.port, self.protocol)
 
-class Rich_SourcePort(Rich_Port):
+class Rich_SourcePort:
+    def __init__(self, port, protocol):
+        self.port = port
+        self.protocol = protocol
+
     def __str__(self):
         return 'source-port port="%s" protocol="%s"' % (self.port,
                                                         self.protocol)
 
-class Rich_Protocol(object):
+class Rich_Protocol:
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return 'protocol value="%s"' % (self.value)
 
-class Rich_Masquerade(object):
+class Rich_Masquerade:
     def __init__(self):
         pass
 
     def __str__(self):
         return 'masquerade'
 
-class Rich_IcmpBlock(object):
+class Rich_IcmpBlock:
     def __init__(self, name):
         self.name = name
 
     def __str__(self):
         return 'icmp-block name="%s"' % (self.name)
 
-class Rich_IcmpType(object):
+class Rich_IcmpType:
     def __init__(self, name):
         self.name = name
 
     def __str__(self):
         return 'icmp-type name="%s"' % (self.name)
 
-class Rich_Tcp_Mss_Clamp(object):
+class Rich_Tcp_Mss_Clamp:
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
-        return 'tcp-mss-clamp value="%s"' % (self.value)
+        if self.value:
+            return 'tcp-mss-clamp value="%s"' % (self.value)
+        else:
+            return 'tcp-mss-clamp'
 
-class Rich_ForwardPort(object):
+class Rich_ForwardPort:
     def __init__(self, port, protocol, to_port, to_address):
         self.port = port
         self.protocol = protocol
@@ -156,7 +155,7 @@ class Rich_ForwardPort(object):
              ' to-port="%s"' % self.to_port if self.to_port != "" else '',
              ' to-addr="%s"' % self.to_address if self.to_address != "" else '')
 
-class Rich_Log(object):
+class Rich_Log:
     def __init__(self, prefix=None, level=None, limit=None):
         #TODO check default level in iptables
         self.prefix = prefix
@@ -181,7 +180,7 @@ class Rich_Log(object):
         if self.limit is not None:
             self.limit.check()
 
-class Rich_NFLog(object):
+class Rich_NFLog:
     def __init__(self, group=None, prefix=None, queue_size=None, limit=None):
         self.group = group
         self.prefix = prefix
@@ -208,7 +207,7 @@ class Rich_NFLog(object):
         if self.limit is not None:
             self.limit.check()
 
-class Rich_Audit(object):
+class Rich_Audit:
     def __init__(self, limit=None):
         #TODO check default level in iptables
         self.limit = limit
@@ -216,14 +215,14 @@ class Rich_Audit(object):
     def __str__(self):
         return 'audit%s' % (" %s" % self.limit if self.limit else "")
 
-class Rich_Accept(object):
+class Rich_Accept:
     def __init__(self, limit=None):
         self.limit = limit
 
     def __str__(self):
         return "accept%s" % (" %s" % self.limit if self.limit else "")
 
-class Rich_Reject(object):
+class Rich_Reject:
     def __init__(self, _type=None, limit=None):
         self.type = _type
         self.limit = limit
@@ -241,12 +240,15 @@ class Rich_Reject(object):
                 valid_types = ", ".join(REJECT_TYPES[family])
                 raise FirewallError(errors.INVALID_RULE, "Wrong reject type %s.\nUse one of: %s." % (self.type, valid_types))
 
-class Rich_Drop(Rich_Accept):
+class Rich_Drop:
+    def __init__(self, limit=None):
+        self.limit = limit
+
     def __str__(self):
         return "drop%s" % (" %s" % self.limit if self.limit else "")
 
 
-class Rich_Mark(object):
+class Rich_Mark:
     def __init__(self, _set, limit=None):
         self.set = _set
         self.limit = limit
@@ -274,7 +276,7 @@ class Rich_Mark(object):
                 # value is uint32
                 raise FirewallError(errors.INVALID_MARK, x)
 
-class Rich_Limit(object):
+class Rich_Limit:
     def __init__(self, value):
         self.value = value
         if "/" in self.value:
@@ -323,7 +325,7 @@ class Rich_Limit(object):
     def command(self):
         return ''
 
-class Rich_Rule(object):
+class Rich_Rule:
     priority_min = -32768
     priority_max =  32767
 
@@ -615,7 +617,7 @@ class Rich_Rule(object):
             if (self.source is not None and self.source.addr is not None) or \
                self.destination is not None:
                 raise FirewallError(errors.MISSING_FAMILY)
-            if type(self.element) == Rich_ForwardPort:
+            if isinstance(self.element, Rich_ForwardPort):
                 raise FirewallError(errors.MISSING_FAMILY)
 
         if self.priority < self.priority_min or self.priority > self.priority_max:
@@ -680,33 +682,33 @@ class Rich_Rule(object):
                 raise FirewallError(errors.INVALID_RULE, "invalid destination")
 
         # service
-        if type(self.element) == Rich_Service:
+        if isinstance(self.element, Rich_Service):
             # service availability needs to be checked in Firewall, here is no
             # knowledge about this, therefore only simple check
             if self.element.name is None or len(self.element.name) < 1:
                 raise FirewallError(errors.INVALID_SERVICE, str(self.element.name))
 
         # port
-        elif type(self.element) == Rich_Port:
+        elif isinstance(self.element, Rich_Port):
             if not functions.check_port(self.element.port):
                 raise FirewallError(errors.INVALID_PORT, self.element.port)
             if self.element.protocol not in [ "tcp", "udp", "sctp", "dccp" ]:
                 raise FirewallError(errors.INVALID_PROTOCOL, self.element.protocol)
 
         # protocol
-        elif type(self.element) == Rich_Protocol:
+        elif isinstance(self.element, Rich_Protocol):
             if not functions.checkProtocol(self.element.value):
                 raise FirewallError(errors.INVALID_PROTOCOL, self.element.value)
 
         # masquerade
-        elif type(self.element) == Rich_Masquerade:
+        elif isinstance(self.element, Rich_Masquerade):
             if self.action is not None:
                 raise FirewallError(errors.INVALID_RULE, "masquerade and action")
             if self.source is not None and self.source.mac is not None:
                 raise FirewallError(errors.INVALID_RULE, "masquerade and mac source")
 
         # icmp-block
-        elif type(self.element) == Rich_IcmpBlock:
+        elif isinstance(self.element, Rich_IcmpBlock):
             # icmp type availability needs to be checked in Firewall, here is no
             # knowledge about this, therefore only simple check
             if self.element.name is None or len(self.element.name) < 1:
@@ -715,14 +717,14 @@ class Rich_Rule(object):
                 raise FirewallError(errors.INVALID_RULE, "icmp-block and action")
 
         # icmp-type
-        elif type(self.element) == Rich_IcmpType:
+        elif isinstance(self.element, Rich_IcmpType):
             # icmp type availability needs to be checked in Firewall, here is no
             # knowledge about this, therefore only simple check
             if self.element.name is None or len(self.element.name) < 1:
                 raise FirewallError(errors.INVALID_ICMPTYPE, str(self.element.name))
 
         # forward-port
-        elif type(self.element) == Rich_ForwardPort:
+        elif isinstance(self.element, Rich_ForwardPort):
             if not functions.check_port(self.element.port):
                 raise FirewallError(errors.INVALID_PORT, self.element.port)
             if self.element.protocol not in [ "tcp", "udp", "sctp", "dccp" ]:
@@ -742,14 +744,14 @@ class Rich_Rule(object):
                 raise FirewallError(errors.INVALID_RULE, "forward-port and action")
 
         # source-port
-        elif type(self.element) == Rich_SourcePort:
+        elif isinstance(self.element, Rich_SourcePort):
             if not functions.check_port(self.element.port):
                 raise FirewallError(errors.INVALID_PORT, self.element.port)
             if self.element.protocol not in [ "tcp", "udp", "sctp", "dccp" ]:
                 raise FirewallError(errors.INVALID_PROTOCOL, self.element.protocol)
 
         # tcp-mss-clamp
-        elif type(self.element) == Rich_Tcp_Mss_Clamp:
+        elif isinstance(self.element, Rich_Tcp_Mss_Clamp):
             if self.action is not None:
                 raise FirewallError(errors.INVALID_RULE, "tcp-mss-clamp and %s are mutually exclusive" % self.action)
             if self.element.value:
@@ -775,9 +777,9 @@ class Rich_Rule(object):
 
         # action
         if self.action is not None:
-            if type(self.action) == Rich_Reject:
+            if isinstance(self.action, Rich_Reject):
                 self.action.check(self.family)
-            elif type(self.action) == Rich_Mark:
+            elif isinstance(self.action, Rich_Mark):
                 self.action.check()
 
             if self.action.limit is not None:
@@ -805,6 +807,6 @@ class Rich_Rule(object):
         return ret
 
 
-#class Rich_RawRule(object):
-#class Rich_RuleSet(object):
-#class Rich_AddressList(object):
+#class Rich_RawRule:
+#class Rich_RuleSet:
+#class Rich_AddressList:

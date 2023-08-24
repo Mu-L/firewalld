@@ -115,11 +115,14 @@ CONFIG_FILES = \
 	icmptypes/unknown-option.xml \
 	ipsets/README.md \
 	policies/allow-host-ipv6.xml \
+	services/0-AD.xml \
 	services/afp.xml \
 	services/amanda-client.xml \
 	services/amanda-k5-client.xml \
 	services/amqp.xml \
 	services/amqps.xml \
+	services/anno-1602.xml \
+	services/anno-1800.xml \
 	services/apcupsd.xml \
 	services/audit.xml \
 	services/ausweisapp2.xml \
@@ -141,6 +144,8 @@ CONFIG_FILES = \
 	services/ceph.xml \
 	services/cfengine.xml \
 	services/checkmk-agent.xml \
+	services/civilization-iv.xml \
+	services/civilization-v.xml \
 	services/cockpit.xml \
 	services/collectd.xml \
 	services/condor-collector.xml \
@@ -153,6 +158,7 @@ CONFIG_FILES = \
 	services/dhcpv6.xml \
 	services/dhcp.xml \
 	services/distcc.xml \
+	services/dns-over-quic.xml \
 	services/dns-over-tls.xml \
 	services/dns.xml \
 	services/docker-registry.xml \
@@ -161,6 +167,7 @@ CONFIG_FILES = \
 	services/elasticsearch.xml \
 	services/etcd-client.xml \
 	services/etcd-server.xml \
+	services/factorio.xml \
 	services/finger.xml \
 	services/foreman.xml \
 	services/foreman-proxy.xml \
@@ -225,6 +232,7 @@ CONFIG_FILES = \
 	services/managesieve.xml \
 	services/matrix.xml \
 	services/mdns.xml \
+	services/minecraft.xml \
 	services/memcache.xml \
 	services/minidlna.xml \
 	services/mongodb.xml \
@@ -238,6 +246,7 @@ CONFIG_FILES = \
 	services/mysql.xml \
 	services/nbd.xml \
 	services/nebula.xml \
+	services/need-for-speed-most-wanted.xml \
 	services/netbios-ns.xml \
 	services/netdata-dashboard.xml \
 	services/nfs.xml \
@@ -247,6 +256,7 @@ CONFIG_FILES = \
 	services/ntp.xml \
 	services/nut.xml \
 	services/openvpn.xml \
+	services/opentelemetry.xml \
 	services/ovirt-imageio.xml \
 	services/ovirt-storageconsole.xml \
 	services/ovirt-vmconsole.xml \
@@ -284,6 +294,7 @@ CONFIG_FILES = \
 	services/samba-dc.xml \
 	services/samba.xml \
 	services/sane.xml \
+	services/settlers-history-collection.xml \
 	services/sips.xml \
 	services/sip.xml \
 	services/slp.xml \
@@ -299,17 +310,23 @@ CONFIG_FILES = \
 	services/squid.xml \
 	services/ssdp.xml \
 	services/ssh.xml \
+	services/statsrv.xml \
 	services/steam-streaming.xml \
+	services/stellaris.xml \
+	services/stronghold-crusader.xml \
+	services/supertuxkart.xml \
 	services/svdrp.xml \
 	services/svn.xml \
 	services/syncthing.xml \
 	services/syncthing-gui.xml \
 	services/syncthing-relay.xml \
 	services/synergy.xml \
+	services/syscomlan.xml \
 	services/syslog-tls.xml \
 	services/syslog.xml \
 	services/telnet.xml \
 	services/tentacle.xml \
+	services/terraria.xml \
 	services/tftp.xml \
 	services/tile38.xml \
 	services/tinc.xml \
@@ -334,7 +351,11 @@ CONFIG_FILES = \
 	services/xmpp-local.xml \
 	services/xmpp-server.xml \
 	services/zabbix-agent.xml \
+	services/zabbix-java-gateway.xml \
 	services/zabbix-server.xml \
+	services/zabbix-trapper.xml \
+	services/zabbix-web-service.xml \
+	services/zero-k.xml \
 	services/zerotier.xml \
 	zones/block.xml \
 	zones/dmz.xml \

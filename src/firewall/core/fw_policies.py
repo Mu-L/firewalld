@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2016 Red Hat, Inc.
 #
@@ -19,15 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "FirewallPolicies" ]
-
 from firewall import config
 from firewall.core.logger import log
 from firewall.core.io.lockdown_whitelist import LockdownWhitelist
 from firewall import errors
 from firewall.errors import FirewallError
 
-class FirewallPolicies(object):
+class FirewallPolicies:
     def __init__(self):
         self._lockdown = False
         self.lockdown_whitelist = LockdownWhitelist(config.LOCKDOWN_WHITELIST)

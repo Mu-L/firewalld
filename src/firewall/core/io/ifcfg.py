@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2016 Red Hat, Inc.
 #
@@ -21,8 +20,6 @@
 
 """ifcfg file parser"""
 
-__all__ = [ "ifcfg" ]
-
 import os.path
 import io
 import tempfile
@@ -30,7 +27,7 @@ import shutil
 
 from firewall.core.logger import log
 
-class ifcfg(object):
+class ifcfg:
     def __init__(self, filename):
         self._config = { }
         self._deleted = [ ]

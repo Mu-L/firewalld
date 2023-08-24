@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -20,11 +19,6 @@
 #
 
 """Functions for NetworkManager interaction"""
-
-__all__ = [ "check_nm_imported", "nm_is_imported",
-            "nm_get_zone_of_connection", "nm_set_zone_of_connection",
-            "nm_get_connections", "nm_get_connection_of_interface",
-            "nm_get_bus_name", "nm_get_dbus_interface" ]
 
 import gi
 from gi.repository import GLib
@@ -186,6 +180,22 @@ def nm_get_interfaces_in_zone(zone):
 
     return interfaces
 
+def nm_get_device_by_ip_iface(interface):
+    """Get device from NM which has the given IP interface
+    @param interface name
+    @returns NM.Device instance or None
+    """
+    check_nm_imported()
+
+    for device in nm_get_client().get_devices():
+        ip_iface = device.get_ip_iface()
+        if ip_iface is None:
+            continue
+        if ip_iface == interface:
+            return device
+
+    return None
+
 def nm_get_connection_of_interface(interface):
     """Get connection from NM that is using the interface
     @param interface name
@@ -193,7 +203,7 @@ def nm_get_connection_of_interface(interface):
     """
     check_nm_imported()
 
-    device = nm_get_client().get_device_by_iface(interface)
+    device = nm_get_device_by_ip_iface(interface)
     if device is None:
         return None
 

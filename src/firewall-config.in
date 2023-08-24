@@ -1,5 +1,4 @@
 #!@PYTHON@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2015 Red Hat, Inc.
 #
@@ -79,7 +78,7 @@ def escape(text):
 
 FIREWALL_CONFIG_SCHEMA = "org.fedoraproject.FirewallConfig"
 
-class FirewallConfig(object):
+class FirewallConfig:
     def __init__(self):
         builder = Gtk.Builder()
         builder.set_translation_domain("firewalld")
@@ -404,7 +403,8 @@ class FirewallConfig(object):
 
         self.zoneView = builder.get_object("zoneView")
         self.zoneStore = Gtk.ListStore(GObject.TYPE_STRING, # name
-                                       GObject.TYPE_INT) # weight
+                                       GObject.TYPE_INT,    # weight
+                                       GObject.TYPE_STRING) # tooltip
         self.zoneView.append_column(
             Gtk.TreeViewColumn("", Gtk.CellRendererText(), text=0, weight=1))
         self.zoneView.set_model(self.zoneStore)
@@ -1743,6 +1743,25 @@ class FirewallConfig(object):
         self.load_lockdown_whitelist()
         self.update_active_zones()
 
+    def _load_store_append(self, zone, is_active):
+        if is_active:
+            weight = Pango.Weight.BOLD
+        else:
+            weight = Pango.Weight.NORMAL
+
+        desc = None
+        zone_obj = self.fw.config().getZoneByName(zone)
+        if zone_obj:
+            settings = zone_obj.getSettings()
+            if settings:
+                desc = settings.getDescription()
+                if desc:
+                    import re
+
+                    desc = re.sub("\s+", ' ', desc)
+
+        self.zoneStore.append([zone, weight, desc])
+
     def load_zones(self):
         selected_zone = self.get_selected_zone()
 
@@ -1780,10 +1799,7 @@ class FirewallConfig(object):
         # zones
         active_zones = self.active_zones.keys()
         for zone in zones:
-            if zone in active_zones:
-                self.zoneStore.append([zone, Pango.Weight.BOLD])
-            else:
-                self.zoneStore.append([zone, Pango.Weight.NORMAL])
+            self._load_store_append(zone, zone in active_zones)
 
         if selected_zone in zones:
             _zone = selected_zone
@@ -2040,15 +2056,15 @@ class FirewallConfig(object):
         if obj.priority:
             priority = obj.priority
         if obj.action:
-            if type(obj.action) == rich.Rich_Accept:
+            if isinstance(obj.action, rich.Rich_Accept):
                 action = _("accept")
-            elif type(obj.action) == rich.Rich_Reject:
+            elif isinstance(obj.action, rich.Rich_Reject):
                 action = _("reject")
                 if obj.action.type is not None:
                     action += "\n" + obj.action.type
-            elif type(obj.action) == rich.Rich_Drop:
+            elif isinstance(obj.action, rich.Rich_Drop):
                 action = _("drop")
-            elif type(obj.action) == rich.Rich_Mark:
+            elif isinstance(obj.action, rich.Rich_Mark):
                 action = _("mark")
                 action += "\nset " + obj.action.set
             if obj.action.limit:
@@ -2067,24 +2083,24 @@ class FirewallConfig(object):
             if obj.destination.invert:
                 dest = "! %s" % dest
         if obj.element:
-            if type(obj.element) == rich.Rich_Service:
+            if isinstance(obj.element, rich.Rich_Service):
                 elem = _("service") + "\n" + obj.element.name
-            elif type(obj.element) == rich.Rich_Port:
+            elif isinstance(obj.element, rich.Rich_Port):
                 elem = _("port") + "\n%s/%s" % (obj.element.port,
                                                 obj.element.protocol)
-            elif type(obj.element) == rich.Rich_Protocol:
+            elif isinstance(obj.element, rich.Rich_Protocol):
                 elem = _("protocol") + "\n" + obj.element.value
-            elif type(obj.element) == rich.Rich_Masquerade:
+            elif isinstance(obj.element, rich.Rich_Masquerade):
                 elem = _("masquerade")
-            elif type(obj.element) == rich.Rich_IcmpBlock:
+            elif isinstance(obj.element, rich.Rich_IcmpBlock):
                 elem = _("icmp-block") + "\n%s" % obj.element.name
-            elif type(obj.element) == rich.Rich_IcmpType:
+            elif isinstance(obj.element, rich.Rich_IcmpType):
                 elem = _("icmp-type") + "\n%s" % obj.element.name
-            elif type(obj.element) == rich.Rich_ForwardPort:
+            elif isinstance(obj.element, rich.Rich_ForwardPort):
                 elem = _("forward-port") + "\n%s" % self.create_fwp_string(
                     obj.element.port, obj.element.protocol,
                     obj.element.to_port, obj.element.to_address)
-            elif type(obj.element) == rich.Rich_SourcePort:
+            elif isinstance(obj.element, rich.Rich_SourcePort):
                 elem = _("source-port") + "\n%s/%s" % (obj.element.port,
                                                        obj.element.protocol)
             else:
@@ -2176,6 +2192,7 @@ class FirewallConfig(object):
             if self.interfaceStore.get_value(iter, 0) == interface:
                 # it is here, remove it
                 self.interfaceStore.remove(iter)
+                break
             iter = self.interfaceStore.iter_next(iter)
         # add if zone is active_zone
         if zone == self.get_selected_zone():
@@ -2214,6 +2231,7 @@ class FirewallConfig(object):
             if self.sourceStore.get_value(iter, 0) == source:
                 # it is here, remove it
                 self.sourceStore.remove(iter)
+                break
             iter = self.sourceStore.iter_next(iter)
         # add if zone is active_zone
         if zone == self.get_selected_zone():
@@ -2229,10 +2247,7 @@ class FirewallConfig(object):
                 return
             iter = self.zoneStore.iter_next(iter)
         # not in list, append
-        if zone in self.active_zones:
-            self.zoneStore.append([zone, Pango.Weight.BOLD])
-        else:
-            self.zoneStore.append([zone, Pango.Weight.NORMAL])
+        self._load_store_append(zone, zone in self.active_zones)
         selection = self.zoneView.get_selection()
         if selection.count_selected_rows() == 0:
             selection.select_path(0)
@@ -2381,11 +2396,12 @@ class FirewallConfig(object):
             self.left_menu.remove(child)
             child.destroy()
 
-        # add connecitons entry
+        # add connections entry
         item = Gtk.MenuItem.new()
         label = Gtk.Label()
         label.set_markup(escape(_("Connections")))
-        label.set_alignment(0, 0.5)
+        label.set_xalign(0)
+        label.set_yalign(0.5)
         item.add(label)
         item.connect("select", self.no_select)
         self.left_menu.append(item)
@@ -2448,8 +2464,10 @@ class FirewallConfig(object):
                 label.set_markup("%s (%s)\n<small>%s: %s</small>" % \
                                  (connection_name, ",".join(_interfaces),
                                   escape(_("Zone")), zone))
-            label.set_alignment(0, 0.5)
-            label.set_padding(12, 0)
+            label.set_xalign(0)
+            label.set_yalign(0.5)
+            label.set_margin_start(12)
+            label.set_margin_end(12)
             hbox.pack_start(label, True, True, 0)
             item.add(hbox)
             item.connect("activate", self.change_zone_connection_editor, connection, connection_name, zone)
@@ -2473,7 +2491,8 @@ class FirewallConfig(object):
         item = Gtk.MenuItem.new()
         label = Gtk.Label()
         label.set_markup(escape(_("Interfaces")))
-        label.set_alignment(0, 0.5)
+        label.set_xalign(0)
+        label.set_yalign(0.5)
         item.add(label)
         item.connect("select", self.no_select)
         self.left_menu.append(item)
@@ -2488,8 +2507,10 @@ class FirewallConfig(object):
                 label = Gtk.Label()
                 label.set_markup("%s\n<small>%s: %s</small>" % \
                                      (interface, escape(_("Zone")), zone))
-                label.set_alignment(0, 0.5)
-                label.set_padding(12, 0)
+                label.set_xalign(0)
+                label.set_yalign(0.5)
+                label.set_margin_start(12)
+                label.set_margin_end(12)
                 hbox.pack_start(label, True, True, 0)
                 item.add(hbox)
                 item.connect("activate", self.change_zone_interface_editor, interface, zone)
@@ -2504,7 +2525,8 @@ class FirewallConfig(object):
         item = Gtk.MenuItem.new()
         label = Gtk.Label()
         label.set_markup(escape(_("Sources")))
-        label.set_alignment(0, 0.5)
+        label.set_xalign(0)
+        label.set_yalign(0.5)
         item.add(label)
         item.connect("select", self.no_select)
         self.left_menu.append(item)
@@ -2519,8 +2541,10 @@ class FirewallConfig(object):
                 label.set_markup("%s\n<small>%s: %s</small>" % \
                                      (source, escape(_("Zone")),
                                       zone))
-                label.set_alignment(0, 0.5)
-                label.set_padding(12, 0)
+                label.set_xalign(0)
+                label.set_yalign(0.5)
+                label.set_margin_start(12)
+                label.set_margin_end(12)
                 hbox.pack_start(label, True, True, 0)
                 item.add(hbox)
                 item.connect("activate", self.change_zone_source_editor, source, zone)
@@ -3158,36 +3182,36 @@ class FirewallConfig(object):
                 self.richRuleDialogElementCheck.set_active(True)
 
             # element
-            if type(old_obj.element) == rich.Rich_Service:
+            if isinstance(old_obj.element, rich.Rich_Service):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("service"))
                 self.richRuleDialogElementChooser.set_text( \
                     old_obj.element.name)
 
-            elif type(old_obj.element) == rich.Rich_Port:
+            elif isinstance(old_obj.element, rich.Rich_Port):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("port"))
                 self.richRuleDialogElementChooser.set_text( \
                     "%s/%s" % (old_obj.element.port, old_obj.element.protocol))
-            elif type(old_obj.element) == rich.Rich_Protocol:
+            elif isinstance(old_obj.element, rich.Rich_Protocol):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("protocol"))
                 self.richRuleDialogElementChooser.set_text( \
                     old_obj.element.value)
-            elif type(old_obj.element) == rich.Rich_Masquerade:
+            elif isinstance(old_obj.element, rich.Rich_Masquerade):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("masquerade"))
-            elif type(old_obj.element) == rich.Rich_IcmpBlock:
+            elif isinstance(old_obj.element, rich.Rich_IcmpBlock):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("icmp-block"))
                 self.richRuleDialogElementChooser.set_text( \
                     old_obj.element.name)
-            elif type(old_obj.element) == rich.Rich_IcmpType:
+            elif isinstance(old_obj.element, rich.Rich_IcmpType):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("icmp-type"))
                 self.richRuleDialogElementChooser.set_text( \
                     old_obj.element.name)
-            elif type(old_obj.element) == rich.Rich_ForwardPort:
+            elif isinstance(old_obj.element, rich.Rich_ForwardPort):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("forward-port"))
                 s = "%s/%s" % (old_obj.element.port, old_obj.element.protocol)
@@ -3196,7 +3220,7 @@ class FirewallConfig(object):
                 if old_obj.element.to_address != "":
                     s += " @%s" % old_obj.element.to_address
                 self.richRuleDialogElementChooser.set_text(s)
-            elif type(old_obj.element) == rich.Rich_SourcePort:
+            elif isinstance(old_obj.element, rich.Rich_SourcePort):
                 combobox_select_text(self.richRuleDialogElementCombobox,
                                      _("source-port"))
                 self.richRuleDialogElementChooser.set_text( \
@@ -3205,9 +3229,9 @@ class FirewallConfig(object):
             if old_obj.action:
                 self.richRuleDialogActionCheck.set_active(True)
                 action = None
-                if type(old_obj.action) == rich.Rich_Accept:
+                if isinstance(old_obj.action, rich.Rich_Accept):
                     action = _("accept")
-                elif type(old_obj.action) == rich.Rich_Reject:
+                elif isinstance(old_obj.action, rich.Rich_Reject):
                     action = _("reject")
                     self.richRuleDialogActionRejectTypeCombobox.remove_all()
                     if old_obj.family is not None:
@@ -3222,9 +3246,9 @@ class FirewallConfig(object):
                         else:
                             self.richRuleDialogActionRejectTypeCombobox. \
                                 set_active_id(REJECT_TYPES[old_obj.family][0])
-                elif type(old_obj.action) == rich.Rich_Drop:
+                elif isinstance(old_obj.action, rich.Rich_Drop):
                     action = _("drop")
-                elif type(old_obj.action) == rich.Rich_Mark:
+                elif isinstance(old_obj.action, rich.Rich_Mark):
                     action = _("mark")
                     self.richRuleDialogActionMarkChooser.set_text(old_obj.action.set)
 
@@ -3739,7 +3763,8 @@ class FirewallConfig(object):
                 or self.richRuleDialogDestinationInvertCheck.get_active()):
             rule.destination = rich.Rich_Destination(
                 self.richRuleDialogDestinationChooser.get_text(),
-                self.richRuleDialogDestinationInvertCheck.get_active())
+                None,
+                invert=self.richRuleDialogDestinationInvertCheck.get_active())
 
         # log
         if self.richRuleDialogLogCheck.is_sensitive() and \
@@ -7990,7 +8015,7 @@ class ZoneInterfaceEditor(Gtk.Dialog):
 
     def create_ui(self, zone):
         self.set_property("width-request", 100)
-        self.resize_to_geometry(100, 50)
+        self.resize(100, 50)
         self.set_resizable(True)
 
         self.add_button("gtk-close", 1)
@@ -8005,7 +8030,8 @@ class ZoneInterfaceEditor(Gtk.Dialog):
         label.set_text(self.title)
         label.set_line_wrap(True)
         label.set_justify(Gtk.Justification.LEFT)
-        label.set_alignment(0, 0.5)
+        label.set_xalign(0)
+        label.set_yalign(0.5)
         vbox.pack_start(label, True, True, 0)
 
         self.combo = Gtk.ComboBoxText()

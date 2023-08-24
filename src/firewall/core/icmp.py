@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2017 Red Hat, Inc.
 #
@@ -18,9 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-__all__ = [ "ICMP_TYPES", "ICMPV6_TYPES",
-            "check_icmp_type", "check_icmpv6_type" ]
 
 ICMP_TYPES = {
      "echo-reply": "0/0",
@@ -94,7 +90,7 @@ def check_icmp_type(_type):
     return False
 
 def check_icmpv6_name(_name):
-    if _name in ICMP_TYPES:
+    if _name in ICMPV6_TYPES:
         return True
     return False
 

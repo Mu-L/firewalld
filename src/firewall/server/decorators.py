@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2012-2016 Red Hat, Inc.
 #
@@ -19,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """This module contains decorators for use with and without D-Bus"""
-
-__all__ = ["handle_exceptions", "dbus_handle_exceptions", "dbus_service_method"]
 
 import dbus
 import dbus.service

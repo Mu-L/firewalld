@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -24,8 +23,6 @@
 #   John Dennis <jdennis@redhat.com>
 #   Thomas Liu  <tliu@redhat.com>
 #   Dan Walsh <dwalsh@redhat.com>
-
-__all__ = [ "run_server" ]
 
 import signal
 

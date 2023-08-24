@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2016 Red Hat, Inc.
 #
@@ -19,13 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "FirewallIcmpType" ]
-
 from firewall.core.logger import log
 from firewall import errors
 from firewall.errors import FirewallError
 
-class FirewallIcmpType(object):
+class FirewallIcmpType:
     def __init__(self, fw):
         self._fw = fw
         self._icmptypes = { }

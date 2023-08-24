@@ -1,7 +1,7 @@
 SUBDIRS = config doc po shell-completion src
-DIST_TARGETS = dist-gzip
 
 EXTRA_DIST = \
+	.flake8 \
 	CODE_OF_CONDUCT.md \
 	COPYING \
 	README.md \
@@ -14,7 +14,7 @@ DISTCLEANFILES = config.log intltool-*
 
 DISTCLEANDIRS = autom4te.cache ${PACKAGE_NAME}-*
 
-dist: clean-docs update-docs
+dist: all
 
 dist-container:
 	$(PODMAN) build --squash-all -t firewalld -f $(abs_top_srcdir)/Dockerfile $(abs_top_srcdir)
@@ -32,17 +32,11 @@ check-container check-integration installcheck-integration:
 .PHONY: check-container check-integration installcheck-integration
 .PHONY: dist-container
 
-update-docs:
-	$(MAKE) -C doc/xml
+rpm test-rpm: dist
+	@rpmbuild -ta $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.bz2
 
-clean-docs:
-	$(MAKE) -C doc/xml clean
-
-test-rpm: dist-gzip
-	@rpmbuild -ta $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
-
-test-srpm: dist-gzip
-	@rpmbuild -ts $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
+srpm test-srpm: dist
+	@rpmbuild -ts $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.bz2
 
 update-po:
 	ls $(top_srcdir)/po/*.po | sed 's/.*\/po\///;s/.po//' > $(top_srcdir)/po/LINGUAS

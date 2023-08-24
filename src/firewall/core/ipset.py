@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2016 Red Hat, Inc.
 #
@@ -20,8 +19,6 @@
 #
 
 """The ipset command wrapper"""
-
-__all__ = [ "ipset", "check_ipset_name", "remove_default_create_options" ]
 
 import os.path
 import ipaddress
@@ -69,7 +66,7 @@ IPSET_DEFAULT_CREATE_OPTIONS = {
     "maxelem": "65536",
 }
 
-class ipset(object):
+class ipset:
     """ipset command wrapper class"""
 
     def __init__(self):

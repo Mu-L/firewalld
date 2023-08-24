@@ -43,6 +43,7 @@ These are the runtime dependencies:
 
 ```
   linux >= 5.3
+  python >= 3.7
   python3-dbus
   python3-gobject
   python3-nftables >= 0.9.4
@@ -77,6 +78,7 @@ source:
   glib2: /usr/bin/glib-compile-schemas
   glib2-devel: /usr/share/aclocal/gsettings.m4
   systemd-units
+  pytest
 ```
 
 To be able to create man pages and documentation from docbook files:

@@ -16,9 +16,6 @@ m4_define([FWD_START_FIREWALLD], [
         FIREWALLD_ARGS="${FIREWALLD_ARGS} --default-config ${FIREWALLD_DEFAULT_CONFIG}"
     fi
 
-    dnl limit data (and heap) to catch unexpected increases in memory usage
-    ulimit -d $(expr 1024 \* 100)
-
     NS_CMD([firewalld $FIREWALLD_ARGS &])
     if test $? -ne 0; then
         AT_FAIL_IF([:])
@@ -28,7 +25,7 @@ m4_define([FWD_START_FIREWALLD], [
     dnl Give it some time for the dbus interface to come up
     WANTED_CODE="$1"
     up=0
-    for I in 1 2 3 4 5 6 7 8 9 0; do
+    for I in $(seq 60); do
         NS_CMD([firewall-cmd --state])
         RC=$?
         echo "exit code = ${RC}"
@@ -107,6 +104,7 @@ m4_define([FWD_START_TEST], [
     dnl in atlocal.
     dnl
     test -z "$PYTHON" && export PYTHON="python3"
+    test -z "$EBTABLES" && export EBTABLES="ebtables"
     test -z "$IPTABLES" && export IPTABLES="iptables"
     test -z "$IPTABLES_RESTORE" && export IPTABLES_RESTORE="iptables-restore"
     test -z "$IP6TABLES" && export IP6TABLES="ip6tables"
@@ -119,6 +117,9 @@ m4_define([FWD_START_TEST], [
         LC_ALL="C.UTF-8"
         export LC_ALL
     fi
+
+    dnl limit data (and heap) to catch unexpected increases in memory usage
+    ulimit -d $(expr 1024 \* 100)
 
     dnl start every test with the default config
     if test "x${FIREWALLD_DEFAULT_CONFIG}" != x ; then
@@ -378,7 +379,7 @@ m4_define([EBTABLES_LIST_RULES_NORMALIZE], [dnl
 m4_define([EBTABLES_LIST_RULES], [
     dnl ebtables commit 5f508b76a0ce change list output for inversion.
     m4_ifdef([TESTING_FIREWALL_OFFLINE_CMD], [], [
-        NS_CHECK([PIPESTATUS0([ebtables --concurrent -t $1 -L $2], [EBTABLES_LIST_RULES_NORMALIZE])],
+        NS_CHECK([PIPESTATUS0([$EBTABLES --concurrent -t $1 -L $2], [EBTABLES_LIST_RULES_NORMALIZE])],
                  [$3], [m4_strip([$4])], [m4_strip([$5])], [$6], [$7])
     ])
 ])
@@ -389,6 +390,20 @@ m4_define([IPXTABLES_LIST_RULES_NORMALIZE], [dnl
     dnl iptables-1.8.8 changed output of some protocols
     dnl commit b6196c7504d4 ("xshared: Prefer xtables_chain_protos lookup over getprotoent")
     sed -e ['s/[ ]ipv6-icmp\([ -]\)/ icmpv6\1/g'] dnl
+    dnl commit da8ecc62dd76 ("xshared: Print protocol numbers if --numeric was given")
+    dnl Caused protocols to be printed in numeric form. We use numeric to avoid
+    dnl reverse DNS lookups. "fix" old iptables versions by translating to
+    dnl numeric here. The first regex must match zone/policy names.
+        -e ['s/^\([-a-zA-Z0-9_]\+\)[ ]all/\1 0/g'] dnl
+        -e ['s/^\([-a-zA-Z0-9_]\+\)[ ]tcp/\1 6/g'] dnl
+        -e ['s/^\([-a-zA-Z0-9_]\+\)[ ]udp/\1 17/g'] dnl
+        -e ['s/^\([-a-zA-Z0-9_]\+\)[ ]icmpv6/\1 58 /g'] dnl
+        -e ['s/^\([-a-zA-Z0-9_]\+\)[ ]icmp/\1 1/g'] dnl
+        -e ['s/^\([-a-zA-Z0-9_]\+\)[ ]sctp/\1 132/g'] dnl
+    dnl commit 6e41c2d8747b ("iptables: xshared: Output '--' in the opt field
+    dnl in ipv6's fake mode") added "--" to the output of ip6tables. This regex
+    dnl adds the "--" for older ip6tables versions.
+        -e ['s/^\([-a-zA-Z0-9_]\+\)[ ]\([^ ]*\)[ ][-]\?[-]\?[ ]\?/\1 \2 -- /g'] dnl
 ])
 
 m4_define([IPTABLES_LIST_RULES_NORMALIZE], [dnl
@@ -710,4 +725,12 @@ m4_define([CHECK_NM_CAPABILITY_OVS], [
 
 m4_define([IF_BACKEND_IS_DEFAULT], [
     m4_if(nftables, FIREWALL_BACKEND, [$1], [])
+])
+
+m4_define([CHECK_NFTABLES_FLOWTABLE], [
+    m4_if(nftables, FIREWALL_BACKEND, [
+        NS_CHECK([nft add table inet firewalld_check_flowtable])
+        AT_SKIP_IF([! NS_CMD([nft add flowtable inet firewalld_check_flowtable foobar { hook ingress priority 0 \; } >/dev/null 2>&1])])
+        NS_CHECK([nft delete table inet firewalld_check_flowtable])
+    ])
 ])

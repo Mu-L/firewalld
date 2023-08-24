@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2013-2016 Red Hat, Inc.
 #
@@ -19,9 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "LastUpdatedOrderedDict" ]
-
-class LastUpdatedOrderedDict(object):
+class LastUpdatedOrderedDict:
     def __init__(self, x=None):
         self._dict = { }
         self._list = [ ]
@@ -54,7 +51,7 @@ class LastUpdatedOrderedDict(object):
         self._dict[key] = value
 
     def __getitem__(self, key):
-        if type(key) == int:
+        if isinstance(key, int):
             return self._list[key]
         else:
             return self._dict[key]

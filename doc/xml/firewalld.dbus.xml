@@ -1323,6 +1323,8 @@
                   <varlistentry><term><parameter>source_ports (a(ss))</parameter>: array of port and protocol pairs. See <literal>source-port</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>icmp_block_inversion (b)</parameter>: see <literal>icmp-block-inversion</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>forward (b)</parameter>: see <literal>forward</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>ingress-priority (i)</parameter>: see <literal>ingress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>egress-priority (i)</parameter>: see <literal>egress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                 </variablelist>
               </para>
               <para>
@@ -2518,6 +2520,8 @@
                   <varlistentry><term><parameter>source_ports (a(ss))</parameter>: array of port and protocol pairs. See <literal>source-port</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>icmp_block_inversion (b)</parameter>: see <literal>icmp-block-inversion</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>forward (b)</parameter>: see <literal>forward</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>ingress_priority (i)</parameter>: see <literal>ingress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>egress_priority (i)</parameter>: see <literal>egress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                 </variablelist>
               </para>
               <para>
@@ -2898,6 +2902,26 @@
                 As per RFC 3964, filter IPv6 traffic with 6to4 destination
                 addresses that correspond to IPv4 addresses that should not be
                 routed over the public internet. Valid options are; yes, no.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry id="FirewallD1.config.Properties.NftablesFlowtable">
+            <term>NftablesFlowtable - s - (rw)</term>
+            <listitem>
+              <para>
+                This may improve forwarded traffic throughput by enabling
+                nftables flowtable. It is a software fastpath and avoids
+                calling nftables rule evaluation for data packets. Its
+                value is a space separate list of interfaces.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry id="FirewallD1.config.Properties.NftablesCounters">
+            <term>NftablesCounters - s - (rw)</term>
+            <listitem>
+              <para>
+                If set to yes, add a counter to every nftables rule. This is
+                useful for debugging and comes with a small performance cost.
               </para>
             </listitem>
           </varlistentry>
@@ -4077,6 +4101,8 @@
                   <varlistentry><term><parameter>source_ports (a(ss))</parameter>: array of port and protocol pairs. See <literal>source-port</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>icmp_block_inversion (b)</parameter>: see <literal>icmp-block-inversion</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>forward (b)</parameter>: see <literal>forward</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>ingress_priority (i)</parameter>: see <literal>ingress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>egress_priority (i)</parameter>: see <literal>egress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                 </variablelist>
               </para>
             </listitem>
@@ -4585,6 +4611,8 @@
                   <varlistentry><term><parameter>source_ports (a(ss))</parameter>: array of port and protocol pairs. See <literal>source-port</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>icmp_block_inversion (b)</parameter>: see <literal>icmp-block-inversion</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                   <varlistentry><term><parameter>forward (b)</parameter>: see <literal>forward</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>ingress_priority (i)</parameter>: see <literal>ingress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
+                  <varlistentry><term><parameter>egress_priority (i)</parameter>: see <literal>egress-priority</literal> tag in <citerefentry><refentrytitle>firewalld.zone</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</term></varlistentry>
                 </variablelist>
               </para>
           <para>

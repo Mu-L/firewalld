@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2016 Red Hat, Inc.
 #
@@ -21,9 +20,6 @@
 
 """Generic io_object handler, io specific check methods."""
 
-__all__ = [ "IO_Object", "IO_Object_ContentHandler", "IO_Object_XMLGenerator",
-            "check_port", "check_tcpudp", "check_protocol", "check_address" ]
-
 import xml.sax as sax
 import xml.sax.saxutils as saxutils
 import copy
@@ -33,7 +29,7 @@ from firewall import functions
 from firewall import errors
 from firewall.errors import FirewallError
 
-class IO_Object(object):
+class IO_Object:
     """ Abstract IO_Object as base for icmptype, service and zone """
 
     IMPORT_EXPORT_STRUCTURE = ( )
@@ -59,7 +55,7 @@ class IO_Object(object):
         conf = {}
         type_formats = dict([(x[0], x[1]) for x in self.IMPORT_EXPORT_STRUCTURE])
         for key in type_formats:
-            if getattr(self, key) or isinstance(getattr(self, key), bool):
+            if getattr(self, key) or isinstance(getattr(self, key), bool) or isinstance(getattr(self, key), int):
                 conf[key] = copy.deepcopy(getattr(self, key))
         return conf
 

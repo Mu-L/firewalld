@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2016 Red Hat, Inc.
 #
@@ -24,6 +23,7 @@
 DEFAULT_ZONE_TARGET = "{chain}_{zone}"
 DEFAULT_POLICY_TARGET = "CONTINUE"
 DEFAULT_POLICY_PRIORITY = -1
+DEFAULT_ZONE_PRIORITY = 0
 
 ZONE_TARGETS = [ "ACCEPT", "%%REJECT%%", "DROP", DEFAULT_ZONE_TARGET,
                  "default" ]

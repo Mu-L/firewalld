@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2016 Red Hat, Inc.
 #
@@ -21,8 +20,6 @@
 
 """FirewallCommand class for command line client simplification"""
 
-__all__ = [ "FirewallCommand" ]
-
 import sys
 
 from firewall import errors
@@ -31,7 +28,7 @@ from dbus.exceptions import DBusException
 from firewall.functions import checkIPnMask, checkIP6nMask, check_mac, \
     check_port, check_single_address
 
-class FirewallCommand(object):
+class FirewallCommand:
     def __init__(self, quiet=False, verbose=False):
         self.quiet = quiet
         self.verbose = verbose
@@ -377,7 +374,8 @@ class FirewallCommand(object):
                                 "Module name '%s' too short" % value)
         return value
 
-    def print_zone_policy_info(self, zone, settings, default_zone=None, extra_interfaces=[], isPolicy=True): # pylint: disable=R0914
+    def print_zone_policy_info(self, zone, settings, default_zone=None, extra_interfaces=[],
+                               active_zones=[], active_policies=[], isPolicy=True): # pylint: disable=R0914
         target = settings.getTarget()
         services = settings.getServices()
         ports = settings.getPorts()
@@ -398,6 +396,8 @@ class FirewallCommand(object):
             interfaces = sorted(set(settings.getInterfaces() + extra_interfaces))
             sources = settings.getSources()
             forward = settings.getForward()
+            ingress_priority = settings.getIngressPriority()
+            egress_priority = settings.getEgressPriority()
 
         def rich_rule_sorted_key(rule):
             priority = 0
@@ -416,8 +416,9 @@ class FirewallCommand(object):
         if default_zone is not None:
             if zone == default_zone:
                 attributes.append("default")
-        if (not isPolicy and (interfaces or sources)) or \
-           (    isPolicy and ingress_zones and egress_zones):
+        if not isPolicy and zone in active_zones:
+            attributes.append("active")
+        if isPolicy and zone in active_policies:
             attributes.append("active")
         if attributes:
             zone = zone + " (%s)" % ", ".join(attributes)
@@ -429,6 +430,8 @@ class FirewallCommand(object):
             self.print_msg("  priority: " + str(priority))
         self.print_msg("  target: " + target)
         if not isPolicy:
+            self.print_msg("  ingress-priority: " + str(ingress_priority))
+            self.print_msg("  egress-priority: " + str(egress_priority))
             self.print_msg("  icmp-block-inversion: %s" % \
                            ("yes" if icmp_block_inversion else "no"))
         if isPolicy:
@@ -456,11 +459,13 @@ class FirewallCommand(object):
         self.print_msg("  rich rules: " + ("\n\t" if rules else "") +
                             "\n\t".join(sorted(rules, key=rich_rule_sorted_key)))
 
-    def print_zone_info(self, zone, settings, default_zone=None, extra_interfaces=[]):
-        self.print_zone_policy_info(zone, settings, default_zone=default_zone, extra_interfaces=extra_interfaces, isPolicy=False)
+    def print_zone_info(self, zone, settings, default_zone=None, extra_interfaces=[], active_zones=[]):
+        self.print_zone_policy_info(zone, settings, default_zone=default_zone, extra_interfaces=extra_interfaces,
+                                    active_zones=active_zones, isPolicy=False)
 
-    def print_policy_info(self, policy, settings, default_zone=None, extra_interfaces=[]):
-        self.print_zone_policy_info(policy, settings, default_zone=default_zone, extra_interfaces=extra_interfaces, isPolicy=True)
+    def print_policy_info(self, policy, settings, default_zone=None, extra_interfaces=[], active_policies=[]):
+        self.print_zone_policy_info(policy, settings, default_zone=default_zone, extra_interfaces=extra_interfaces,
+                                    active_policies=active_policies, isPolicy=True)
 
     def print_service_info(self, service, settings):
         ports = settings.getPorts()

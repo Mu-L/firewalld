@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2016 Red Hat, Inc.
 #
@@ -19,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "FirewallConfig" ]
-
 import copy
 import os
 import os.path
@@ -38,7 +35,7 @@ from firewall.core.io.policy import Policy, policy_reader, policy_writer
 from firewall import errors
 from firewall.errors import FirewallError
 
-class FirewallConfig(object):
+class FirewallConfig:
     def __init__(self, fw):
         self._fw = fw
         self.__init_vars()

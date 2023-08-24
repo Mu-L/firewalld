@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -19,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "FirewallDirect" ]
-
 from firewall.fw_types import LastUpdatedOrderedDict
 from firewall.core import ipXtables
 from firewall.core import ebtables
@@ -35,7 +32,7 @@ from firewall.errors import FirewallError
 #
 ############################################################################
 
-class FirewallDirect(object):
+class FirewallDirect:
     def __init__(self, fw):
         self._fw = fw
         self.__init_vars()
@@ -219,6 +216,9 @@ class FirewallDirect(object):
         else:
             transaction = use_transaction
 
+        if self._fw.may_skip_flush_direct_backends():
+            transaction.add_pre(self._fw.flush_direct_backends)
+
         if self._fw.ipset_enabled and self._fw.ipset.omit_native_ipset():
             transaction.add_pre(self._fw.ipset.apply_ipsets, [self._fw.ipset_backend])
 
@@ -267,6 +267,9 @@ class FirewallDirect(object):
             transaction = self.new_transaction()
         else:
             transaction = use_transaction
+
+        if self._fw.may_skip_flush_direct_backends():
+            transaction.add_pre(self._fw.flush_direct_backends)
 
         if self._fw.ipset_enabled and self._fw.ipset.omit_native_ipset():
             transaction.add_pre(self._fw.ipset.apply_ipsets, [self._fw.ipset_backend])
@@ -352,6 +355,9 @@ class FirewallDirect(object):
             transaction = self.new_transaction()
         else:
             transaction = use_transaction
+
+        if self._fw.may_skip_flush_direct_backends():
+            transaction.add_pre(self._fw.flush_direct_backends)
 
         if self._fw.ipset_enabled and self._fw.ipset.omit_native_ipset():
             transaction.add_pre(self._fw.ipset.apply_ipsets, [self._fw.ipset_backend])

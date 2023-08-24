@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -20,9 +19,6 @@
 #
 
 import subprocess
-
-
-__all__ = ["runProg"]
 
 
 def runProg(prog, argv=None, stdin=None):

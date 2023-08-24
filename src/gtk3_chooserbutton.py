@@ -1,5 +1,4 @@
 #!/usr/bin/python -Es
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2008,2012 Red Hat, Inc.
 #
@@ -25,7 +24,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-class ChooserButton(object):
+class ChooserButton:
     def __init__(self, button, default_label=""):
         self.button = button
         self.default_label = default_label
@@ -136,7 +135,7 @@ class ChooserButton(object):
         return (x, y, True)
 
 
-class ToolChooserButton(object):
+class ToolChooserButton:
 
     def __init__(self, button, default_label=''):
 

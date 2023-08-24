@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2016 Red Hat, Inc.
 #
@@ -20,8 +19,6 @@
 #
 
 """ipset io XML handler, reader, writer"""
-
-__all__ = [ "IPSet", "ipset_reader", "ipset_writer" ]
 
 import xml.sax as sax
 import os
@@ -102,8 +99,7 @@ class IPSet(IO_Object):
                 "entry '%s' does not match ipset type '%s'" % \
                 (entry, ipset_type))
 
-        for i in range(len(flags)):
-            flag = flags[i]
+        for i, flag in enumerate(flags):
             item = items[i]
 
             if flag == "ip":

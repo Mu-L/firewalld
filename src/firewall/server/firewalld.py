@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -17,8 +16,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-__all__ = [ "FirewallD" ]
 
 from gi.repository import GLib
 
@@ -1137,6 +1134,9 @@ class FirewallD(DbusServiceObject):
         self.accessCheck(sender)
         self.fw.set_default_zone(zone)
         self.DefaultZoneChanged(zone)
+        self.fw.reload()
+        self.config.reload()
+        self.Reloaded()
 
     @dbus.service.signal(config.dbus.DBUS_INTERFACE, signature='s')
     @dbus_handle_exceptions
@@ -1194,15 +1194,9 @@ class FirewallD(DbusServiceObject):
         # returns the list of active zones
         log.debug1("zone.getActiveZones()")
         zones = { }
-        for zone in self.fw.zone.get_zones():
-            interfaces = self.fw.zone.list_interfaces(zone)
-            sources = self.fw.zone.list_sources(zone)
-            if len(interfaces) + len(sources) > 0:
-                zones[zone] = { }
-                if len(interfaces) > 0:
-                    zones[zone]["interfaces"] = interfaces
-                if len(sources) > 0:
-                    zones[zone]["sources"] = sources
+        for zone in self.fw.zone.get_active_zones():
+            zones[zone] = {"interfaces": self.fw.zone.list_interfaces(zone),
+                           "sources": self.fw.zone.list_sources(zone)}
         return zones
 
     @dbus_polkit_require_auth(config.dbus.PK_ACTION_INFO)

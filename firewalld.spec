@@ -1,10 +1,10 @@
 Summary: A firewall daemon with D-Bus interface providing a dynamic firewall
 Name: firewalld
-Version: 1.2.999
+Version: 2.0.999
 Release: 1%{?dist}
 URL:     http://firewalld.org
 License: GPLv2+
-Source0: https://github.com/firewalld/firewalld/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0: https://github.com/firewalld/firewalld/archive/v%{version}.tar.bz2#/%{name}-%{version}.tar.bz2
 BuildArch: noarch
 BuildRequires: autoconf
 BuildRequires: automake
@@ -18,7 +18,7 @@ BuildRequires: docbook-style-xsl
 BuildRequires: libxslt
 BuildRequires: iptables, ebtables, ipset
 BuildRequires: python3-devel
-Requires: iptables, ebtables, ipset
+Recommends: iptables, ebtables, ipset
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -61,7 +61,11 @@ Summary: Firewall panel applet
 Requires: %{name} = %{version}-%{release}
 Requires: firewall-config = %{version}-%{release}
 Requires: hicolor-icon-theme
+%if (0%{?fedora} >= 39 || 0%{?rhel} >= 10)
+Requires: python3-pyqt6
+%else
 Requires: python3-qt5
+%endif
 Requires: python3-gobject
 Requires: libnotify
 Requires: NetworkManager-libnm
@@ -224,7 +228,7 @@ fi
 %{_datadir}/firewalld/testsuite/python/firewalld_config.py
 %{_datadir}/firewalld/testsuite/python/firewalld_direct.py
 %{_datadir}/firewalld/testsuite/python/firewalld_rich.py
-%{_datadir}/firewalld/testsuite/python/firewalld_test.py
+%{_datadir}/firewalld/testsuite/python/firewalld_misc.py
 
 %files -n firewall-applet
 %attr(0755,root,root) %dir %{_sysconfdir}/firewall
@@ -248,5 +252,5 @@ fi
 %{_mandir}/man1/firewall-config*.1*
 
 %changelog
-* Fri Jul 01 2022 Eric Garver <eric@garver.life> - 1.2.999-1
+* Mon Jul 10 2023 Eric Garver <eric@garver.life> - 2.0.999-1
 - bump package version to development version

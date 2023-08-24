@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -20,8 +19,6 @@
 #
 
 """Functions to search for and change ifcfg files"""
-
-__all__ = [ "search_ifcfg_of_interface", "ifcfg_set_zone_of_interface" ]
 
 import os
 import os.path

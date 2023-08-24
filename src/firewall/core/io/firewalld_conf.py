@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011-2012 Red Hat, Inc.
 #
@@ -31,9 +30,9 @@ valid_keys = [ "DefaultZone", "MinimalMark", "CleanupOnExit",
                "CleanupModulesOnExit", "Lockdown", "IPv6_rpfilter",
                "IndividualCalls", "LogDenied", "AutomaticHelpers",
                "FirewallBackend", "FlushAllOnReload", "RFC3964_IPv4",
-               "AllowZoneDrifting" ]
+               "AllowZoneDrifting", "NftablesFlowtable", "NftablesCounters"]
 
-class firewalld_conf(object):
+class firewalld_conf:
     def __init__(self, filename):
         self._config = { }
         self._deleted = [ ]
@@ -79,6 +78,8 @@ class firewalld_conf(object):
         self.set("FlushAllOnReload", "yes" if config.FALLBACK_FLUSH_ALL_ON_RELOAD else "no")
         self.set("RFC3964_IPv4", "yes" if config.FALLBACK_RFC3964_IPV4 else "no")
         self.set("AllowZoneDrifting", "yes" if config.FALLBACK_ALLOW_ZONE_DRIFTING else "no")
+        self.set("NftablesFlowtable", config.FALLBACK_NFTABLES_FLOWTABLE)
+        self.set("NftablesCounters", "yes" if config.FALLBACK_NFTABLES_COUNTERS else "no")
 
     # load self.filename
     def read(self):

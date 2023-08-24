@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2010-2016 Red Hat, Inc.
 #
@@ -18,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-__all__ = [ "ebtables" ]
 
 import os.path
 from firewall.core.prog import runProg
@@ -49,7 +46,7 @@ for table in BUILT_IN_CHAINS.keys():
         DEFAULT_RULES[table].append("-I %s_direct 1 -j RETURN" % chain)
         OUR_CHAINS[table].add("%s_direct" % chain)
 
-class ebtables(object):
+class ebtables:
     ipv = "eb"
     name = "ebtables"
     policies_supported = False # ebtables only supported with direct interface
@@ -129,9 +126,6 @@ class ebtables(object):
         rule += args
         return rule
 
-    def reverse_rule(self, args):
-        return ipXtables.common_reverse_rule(args)
-
     def check_passthrough(self, args):
         ipXtables.common_check_passthrough(args)
 
@@ -162,11 +156,11 @@ class ebtables(object):
             # we can not use joinArgs here, because it would use "'" instead
             # of '"' for the start and end of the string, this breaks
             # iptables-restore
-            for i in range(len(rule)):
+            for i, element in enumerate(rule):
                 for c in string.whitespace:
-                    if c in rule[i] and not (rule[i].startswith('"') and
-                                             rule[i].endswith('"')):
-                        rule[i] = '"%s"' % rule[i]
+                    if c in element and not (element.startswith('"') and
+                                             element.endswith('"')):
+                        rule[i] = '"%s"' % element
 
             table_rules.setdefault(table, []).append(rule)
 
@@ -261,7 +255,7 @@ class ebtables(object):
                 _default_rules.extend(LOG_RULES[table])
             prefix = [ "-t", table ]
             for rule in _default_rules:
-                if type(rule) == list:
+                if isinstance(rule, list):
                     default_rules.append(prefix + rule)
                 else:
                     default_rules.append(prefix + splitArgs(rule))

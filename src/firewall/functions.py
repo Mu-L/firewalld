@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2007,2008,2011,2012 Red Hat, Inc.
 #
@@ -19,22 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [ "getPortID", "getPortRange", "portStr", "getServiceName",
-            "checkIP", "checkIP6", "checkIPnMask", "checkIP6nMask",
-            "checkProtocol", "checkInterface", "checkUINT16", "checkUINT32",
-            "firewalld_is_active", "tempFile", "readfile", "writefile",
-            "enable_ip_forwarding", "check_port", "check_address",
-            "check_single_address", "check_mac", "uniqify", "ppid_of_pid",
-            "max_zone_name_len", "checkUser", "checkUid", "checkCommand",
-            "checkContext", "joinArgs", "splitArgs",
-            "max_policy_name_len", "checkTcpMssClamp",
-            "stripNonPrintableCharacters"]
-
 import socket
 import os
 import os.path
 import shlex
-import pipes
 import string
 import tempfile
 from firewall.core.logger import log
@@ -296,10 +283,11 @@ def checkIP6(ip):
     return True
 
 def checkIPnMask(ip):
-    if "/" in ip:
-        addr = ip[:ip.index("/")]
-        mask = ip[ip.index("/")+1:]
-        if len(addr) < 1 or len(mask) < 1:
+    index = ip.find("/")
+    if index != -1:
+        addr = ip[:index]
+        mask = ip[index + 1:]
+        if not addr or not mask:
             return False
     else:
         addr = ip
@@ -322,10 +310,11 @@ def stripNonPrintableCharacters(rule_str):
     return rule_str.translate(NOPRINT_TRANS_TABLE)
 
 def checkIP6nMask(ip):
-    if "/" in ip:
-        addr = ip[:ip.index("/")]
-        mask = ip[ip.index("/")+1:]
-        if len(addr) < 1 or len(mask) < 1:
+    index = ip.find("/")
+    if index != -1:
+        addr = ip[:index]
+        mask = ip[index + 1:]
+        if not addr or not mask:
             return False
     else:
         addr = ip
@@ -605,10 +594,7 @@ def checkContext(context):
     return True
 
 def joinArgs(args):
-    if "quote" in dir(shlex):
-        return " ".join(shlex.quote(a) for a in args)
-    else:
-        return " ".join(pipes.quote(a) for a in args)
+    return " ".join(shlex.quote(a) for a in args)
 
 def splitArgs(_string):
     return shlex.split(_string)
